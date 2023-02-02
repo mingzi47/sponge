@@ -3,17 +3,62 @@
 
 #include "byte_stream.hh"
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
+#include <set>
+#include <optional>
+#include <unordered_map>
+
+struct SubString {
+    std::string _data{};
+    size_t _begin{0};
+    size_t _size{0};
+
+    SubString() = default;
+    SubString(const std::string &data, const size_t begin, const size_t size)
+      : _data{data}, _begin{begin}, _size{size} {}
+
+    bool operator<(const SubString &rhs) const { return _begin < rhs._begin; }
+
+    std::optional<size_t> merge(const SubString &other) {
+        SubString lhs{}, rhs{};
+        if (_begin > other._begin) {
+            lhs = other;
+            rhs = *this;
+        } else {
+            lhs = *this;
+            rhs = other;
+        }
+        // can't merge
+        if (lhs._begin + lhs._size < rhs._begin) return std::nullopt; 
+        // \in
+        if (lhs._begin + lhs._size >= rhs._begin + rhs._size) {
+          *this = lhs;
+          return rhs._size;
+        }
+        const size_t res = _begin + _size - rhs._begin;
+        lhs._data += rhs._data.substr((lhs._begin + lhs._size) - rhs._begin);
+        lhs._size = lhs._data.size();
+        *this = lhs;
+        return res;
+    }
+};
 
 //! \brief A class that assembles a series of excerpts from a byte stream (possibly out of order,
 //! possibly overlapping) into an in-order byte stream.
 class StreamReassembler {
   private:
     // Your code here -- add private members as necessary.
-
+    std::set<SubString> _buffer{};
+    size_t _unassembled_bytes{0};
+    size_t _push_pos{0};
+    bool _is_eof{false};
     ByteStream _output;  //!< The reassembled in-order byte stream
     size_t _capacity;    //!< The maximum number of bytes
+
+    SubString cut_substring(const std::string &data, const size_t index);
+    void merge_substring(SubString &ssd);
 
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
