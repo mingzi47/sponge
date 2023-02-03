@@ -37,7 +37,7 @@ struct SubString {
           *this = lhs;
           return rhs._size;
         }
-        const size_t res = _begin + _size - rhs._begin;
+        const size_t res = lhs._begin + lhs._size - rhs._begin;
         lhs._data += rhs._data.substr((lhs._begin + lhs._size) - rhs._begin);
         lhs._size = lhs._data.size();
         *this = lhs;
@@ -52,7 +52,7 @@ class StreamReassembler {
     // Your code here -- add private members as necessary.
     std::set<SubString> _buffer{};
     size_t _unassembled_bytes{0};
-    size_t _push_pos{0};
+    size_t _head_pos{0};
     bool _is_eof{false};
     ByteStream _output;  //!< The reassembled in-order byte stream
     size_t _capacity;    //!< The maximum number of bytes
@@ -61,6 +61,9 @@ class StreamReassembler {
     void merge_substring(SubString &ssd);
 
   public:
+    size_t head_pos() const { return _head_pos; }
+    size_t input_ended() const { return _output.input_ended(); }
+
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
     //! \note This capacity limits both the bytes that have been reassembled,
     //! and those that have not yet been reassembled.
