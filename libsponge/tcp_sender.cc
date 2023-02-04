@@ -84,7 +84,7 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
     }
 
     fill_window();
-
+    // 事件 ： 如果当前有未被确认的报文段，开始定时器
     if (!_segments_outstanding.empty()) {
         _time_running = true;
         _timer = 0;

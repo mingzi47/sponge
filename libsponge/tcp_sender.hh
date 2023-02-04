@@ -10,29 +10,6 @@
 #include <functional>
 #include <queue>
 
-// struct Timer {
-//     uint64_t _cur_time;
-//     uint64_t _initial_timeout;
-//     uint64_t _timeout;
-//     bool _time_running;
-
-//     Timer(unsigned int initial_timeout)
-//         : _cur_time{0}, _initial_timeout{initial_timeout}, _timeout{initial_timeout}, _time_running{false} {}
-
-//     void start() {
-//         if (_time_running)
-//             return;
-//         _cur_time = 0;
-//         _time_running = true;
-//     }
-//     void close() {
-//         _cur_time = 0;
-//         _timeout = _initial_timeout;
-//         _time_running = false;
-//     }
-//     bool timeout() { return _cur_time >= _timeout; }
-//     void update(uint64_t time) { _cur_time += time; }
-// };
 
 //! \brief The "sender" part of a TCP implementation.
 
