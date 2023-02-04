@@ -6,8 +6,33 @@
 #include "tcp_segment.hh"
 #include "wrapping_integers.hh"
 
+#include <bits/stdint-uintn.h>
 #include <functional>
 #include <queue>
+
+// struct Timer {
+//     uint64_t _cur_time;
+//     uint64_t _initial_timeout;
+//     uint64_t _timeout;
+//     bool _time_running;
+
+//     Timer(unsigned int initial_timeout)
+//         : _cur_time{0}, _initial_timeout{initial_timeout}, _timeout{initial_timeout}, _time_running{false} {}
+
+//     void start() {
+//         if (_time_running)
+//             return;
+//         _cur_time = 0;
+//         _time_running = true;
+//     }
+//     void close() {
+//         _cur_time = 0;
+//         _timeout = _initial_timeout;
+//         _time_running = false;
+//     }
+//     bool timeout() { return _cur_time >= _timeout; }
+//     void update(uint64_t time) { _cur_time += time; }
+// };
 
 //! \brief The "sender" part of a TCP implementation.
 
@@ -31,8 +56,25 @@ class TCPSender {
 
     //! the (absolute) sequence number for the next byte to be sent
     uint64_t _next_seqno{0};
+    
+    uint64_t _recv_ackno{0};
+
+    bool _syn_flag{false};
+    bool _fin_flag{false};
+
+    uint64_t _windows_size{0};
+    std::queue<TCPSegment> _segments_outstanding{};
+
+    uint64_t _timer{0};
+    uint64_t _timeout;
+    bool _time_running{false};
+
+    uint64_t _byte_in_flight{0};
+    uint64_t _consecutive_retransmissions{0};
 
   public:
+    void send_segment(TCPSegment& seg);
+
     //! Initialize a TCPSender
     TCPSender(const size_t capacity = TCPConfig::DEFAULT_CAPACITY,
               const uint16_t retx_timeout = TCPConfig::TIMEOUT_DFLT,
