@@ -29,9 +29,10 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
 
     const uint64_t abs_seqno = unwrap(seg.header().seqno, _isn.value(), _pos);
     const uint64_t index = abs_seqno + (issyn ? 1 : 0);
-    const bool received_empty_segment = abs_seqno == _pos && seg.length_in_sequence_space() == 0;
 
-    if (received_empty_segment) return false;
+    // 在 Lab3 之后，了解到可能发送一个空的 TCPSegment 用来侦测
+    const bool received_empty_segment = abs_seqno == _pos && seg.length_in_sequence_space() == 0;
+    if (received_empty_segment) return true;
 
     const bool inbound = abs_seqno + seg.length_in_sequence_space() <= _pos || abs_seqno >= _pos + window_size();
 
