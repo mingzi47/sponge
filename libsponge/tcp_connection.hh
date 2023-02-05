@@ -22,12 +22,11 @@ class TCPConnection {
     bool _linger_after_streams_finish{true};
 
     bool _active{true};
-    bool _need_rst_sent{false};
     size_t _time_since_last_segment_received{0};
 
     bool clean_shutdown();
     void unclean_shutdown(bool rst_sent);
-    bool push_segments(bool syn_sent);
+    bool push_segments(bool syn_sent = false, bool rst_sent = false);
 
     // receiver
     bool is_listen() { return not _receiver.ackno().has_value(); }

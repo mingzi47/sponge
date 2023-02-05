@@ -108,15 +108,14 @@ void TCPConnection::unclean_shutdown(bool rst_sent) {
     _receiver.stream_out().set_error();
     _active = false;
     if (rst_sent) {
-        _need_rst_sent = true;
         if (_sender.segments_out().empty()) {
             _sender.send_empty_segment();
         }
-        push_segments(false);
+        push_segments(false, rst_sent);
     }
 }
 
-bool TCPConnection::push_segments(bool syn_sent) {
+bool TCPConnection::push_segments(bool syn_sent, bool rst_sent) {
     _sender.fill_window(syn_sent or is_syn_recv());
     while (!_sender.segments_out().empty()) {
         TCPSegment seg = _sender.segments_out().front();
@@ -126,8 +125,8 @@ bool TCPConnection::push_segments(bool syn_sent) {
             seg.header().ackno = _receiver.ackno().value();
             seg.header().win = _receiver.window_size();
         }
-        if (_need_rst_sent) {
-            _need_rst_sent = false;
+        if (rst_sent) {
+            rst_sent = false;
             seg.header().rst = true;
         }
         _segments_out.push(seg);
