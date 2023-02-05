@@ -29,12 +29,14 @@ TCPSender::TCPSender(const size_t capacity, const uint16_t retx_timeout, const s
 
 uint64_t TCPSender::bytes_in_flight() const { return _byte_in_flight; }
 
-void TCPSender::fill_window() {
+void TCPSender::fill_window(bool syn_sent) {
     if (!_syn_flag) {
-        TCPSegment seg{};
-        seg.header().syn = true;
-        send_segment(seg);
-        _syn_flag = true;
+        if (syn_sent) {
+            TCPSegment seg{};
+            seg.header().syn = true;
+            send_segment(seg);
+            _syn_flag = true;
+        }
         return;
     }
 

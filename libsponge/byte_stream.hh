@@ -7,6 +7,7 @@
 #include <list>
 #include <string>
 #include <utility>
+#include "buffer.hh"
 
 //! \brief An in-order byte stream.
 
@@ -16,7 +17,8 @@
 class ByteStream {
   private:
     // Your code here -- add private members as necessary.
-    std::deque<char> _buffer{};
+    BufferList _buffer{};
+    size_t _buffer_size = 0;
     size_t _capacity = 0;
     size_t _write_cnt = 0;
     size_t _pop_cnt = 0;

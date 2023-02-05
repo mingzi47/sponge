@@ -21,6 +21,37 @@ class TCPConnection {
     //! in case the remote TCPConnection doesn't know we've received its whole stream?
     bool _linger_after_streams_finish{true};
 
+    bool _active{true};
+    bool _need_rst_sent{false};
+    size_t _time_since_last_segment_received{0};
+
+    bool clean_shutdown();
+    void unclean_shutdown(bool rst_sent);
+    bool push_segments(bool syn_sent);
+
+    // receiver
+    bool is_listen() { return not _receiver.ackno().has_value(); }
+    bool is_syn_recv() { return _receiver.ackno().has_value() and not _receiver.stream_out().input_ended(); }
+    bool is_fin_recv() { return _receiver.stream_out().input_ended(); }
+    // sender
+    bool is_closed() { return _sender.next_seqno_absolute() == 0; }
+    bool is_syn_sent() {
+        return _sender.next_seqno_absolute() > 0 and _sender.next_seqno_absolute() == _sender.bytes_in_flight();
+    }
+    bool is_syn_acked() {
+        return _sender.next_seqno_absolute() > _sender.bytes_in_flight() and not _sender.stream_in().eof();
+    }
+    bool is_fin_sent() {
+        return _sender.stream_in().eof() and
+               _sender.next_seqno_absolute() == _sender.stream_in().bytes_written() + 2 and
+               _sender.bytes_in_flight() > 0;
+    }
+    bool is_fin_acked() {
+        return _sender.stream_in().eof() and
+               _sender.next_seqno_absolute() == _sender.stream_in().bytes_written() + 2 and
+               _sender.bytes_in_flight() == 0;
+    }
+
   public:
     //! \name "Input" interface for the writer
     //!@{
