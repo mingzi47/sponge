@@ -1,5 +1,11 @@
 For build prereqs, see [the CS144 VM setup instructions](https://web.stanford.edu/class/cs144/vm_howto).
 
+- [x] Lab0
+- [x] Lab1
+- [x] Lab2
+- [x] Lab3
+- [x] Lab4
+
 ## Sponge quickstart
 
 To set up your build directory:
